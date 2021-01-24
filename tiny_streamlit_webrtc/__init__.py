@@ -1,5 +1,9 @@
+import logging
 import os
 import streamlit.components.v1 as components
+from aiortc import RTCPeerConnection, RTCSessionDescription
+
+logger = logging.getLogger(__name__)
 
 _RELEASE = False
 
@@ -22,6 +26,29 @@ def tiny_streamlit_webrtc(key=None):
 
         # Debug
         st.write(offer_json)
+
+        offer = RTCSessionDescription(sdp=offer_json["sdp"], type=offer_json["type"])
+
+        pc = RTCPeerConnection()
+
+        @pc.on("track")
+        def on_track(track):
+            logger.info("Track %s received", track.kind)
+            pc.addTrack(track)  # Passthrough. TODO: Implement video transformation
+
+        # TODO: `await` does not work in a function. It must be used inside a coroutine.
+        # handle offer
+        await pc.setRemoteDescription(offer)
+
+        # send answer
+        answer = await pc.createAnswer()
+        await pc.setLocalDescription(answer)
+
+        # TODO: How to send back the answer to frontend?
+        # answer_json = json.dumps(
+        #     {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type}
+        # )
+
 
     return component_value
 
