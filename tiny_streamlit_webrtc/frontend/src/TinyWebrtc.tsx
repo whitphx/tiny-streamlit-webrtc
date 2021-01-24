@@ -32,7 +32,12 @@ class TinyWebrtc extends StreamlitComponentBase<State> {
     return (
       <div>
         <button onClick={this.start}>Start</button>
-        <video ref={this.videoRef} autoPlay playsInline />
+        <video
+          ref={this.videoRef}
+          autoPlay
+          playsInline
+          onCanPlay={() => Streamlit.setFrameHeight()}
+        />
       </div>
     )
   }
