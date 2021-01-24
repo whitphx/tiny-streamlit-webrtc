@@ -32,6 +32,7 @@ class TinyWebrtc extends StreamlitComponentBase<State> {
     return (
       <div>
         <button onClick={this.start}>Start</button>
+        <button onClick={this.stop}>Stop</button>
         <video
           ref={this.videoRef}
           autoPlay
@@ -130,6 +131,34 @@ class TinyWebrtc extends StreamlitComponentBase<State> {
     )
 
     this.pc = pc
+  }
+
+  private stop = () => {
+    const pc = this.pc
+    this.pc = undefined
+
+    if (pc == null) {
+      return
+    }
+
+    // close transceivers
+    if (pc.getTransceivers) {
+      pc.getTransceivers().forEach(function (transceiver) {
+        if (transceiver.stop) {
+          transceiver.stop()
+        }
+      })
+    }
+
+    // close local audio / video
+    pc.getSenders().forEach(function (sender) {
+      sender.track?.stop()
+    })
+
+    // close peer connection
+    setTimeout(function () {
+      pc.close()
+    }, 500)
   }
 }
 
