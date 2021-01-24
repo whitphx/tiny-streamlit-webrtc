@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import streamlit.components.v1 as components
@@ -18,6 +19,24 @@ else:
     _component_func = components.declare_component("tiny_streamlit_webrtc", path=build_dir)
 
 
+async def process_offer(offer: RTCSessionDescription) -> RTCPeerConnection:
+    pc = RTCPeerConnection()
+
+    @pc.on("track")
+    def on_track(track):
+        logger.info("Track %s received", track.kind)
+        pc.addTrack(track)  # Passthrough. TODO: Implement video transformation
+
+    # handle offer
+    await pc.setRemoteDescription(offer)
+
+    # send answer
+    answer = await pc.createAnswer()
+    await pc.setLocalDescription(answer)
+
+    return pc
+
+
 def tiny_streamlit_webrtc(key=None):
     component_value = _component_func(key=key, default=None)
 
@@ -29,25 +48,12 @@ def tiny_streamlit_webrtc(key=None):
 
         offer = RTCSessionDescription(sdp=offer_json["sdp"], type=offer_json["type"])
 
-        pc = RTCPeerConnection()
+        pc = asyncio.run(process_offer(offer))
+        logger.info("process_offer() is completed and RTCPeerConnection is set up: %s", pc)
 
-        @pc.on("track")
-        def on_track(track):
-            logger.info("Track %s received", track.kind)
-            pc.addTrack(track)  # Passthrough. TODO: Implement video transformation
-
-        # TODO: `await` does not work in a function. It must be used inside a coroutine.
-        # handle offer
-        await pc.setRemoteDescription(offer)
-
-        # send answer
-        answer = await pc.createAnswer()
-        await pc.setLocalDescription(answer)
-
+        # Debug
+        st.write(pc.localDescription)
         # TODO: How to send back the answer to frontend?
-        # answer_json = json.dumps(
-        #     {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type}
-        # )
 
 
     return component_value
