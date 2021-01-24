@@ -90,7 +90,10 @@ def tiny_streamlit_webrtc(key):
             offer = RTCSessionDescription(sdp=offer_json["sdp"], type=offer_json["type"])
 
             answer_queue = queue.Queue()
-            webrtc_thread = threading.Thread(target=webrtc_worker, args=(offer, answer_queue))
+            webrtc_thread = threading.Thread(
+                target=webrtc_worker,
+                args=(offer, answer_queue),
+                daemon=True)
             webrtc_thread.start()
             session_state.webrtc_thread = webrtc_thread
 
