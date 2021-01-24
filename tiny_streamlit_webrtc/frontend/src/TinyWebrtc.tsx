@@ -21,6 +21,10 @@ class TinyWebrtc extends StreamlitComponentBase<State> {
     this.videoRef = React.createRef()
   }
 
+  public componentDidUpdate = () => {
+    console.log("Answer: ", this.props.args["answer"])
+  }
+
   public render = (): ReactNode => {
     return (
       <div>
