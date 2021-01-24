@@ -22,7 +22,10 @@ class TinyWebrtc extends StreamlitComponentBase<State> {
   }
 
   public componentDidUpdate = () => {
-    console.log("Answer: ", this.props.args["answer"])
+    if (this.props.args["answer"]) {
+      const answer = new RTCSessionDescription(this.props.args["answer"])
+      this.processAnswer(answer)
+    }
   }
 
   public render = (): ReactNode => {
@@ -90,6 +93,15 @@ class TinyWebrtc extends StreamlitComponentBase<State> {
           offerJson,
         })
       })
+  }
+
+  private processAnswer = (answer: RTCSessionDescription) => {
+    if (this.pc == null) {
+      console.error("this.pc is not initialized yet.")
+      return
+    }
+
+    this.pc.setRemoteDescription(answer)
   }
 
   private start = () => {
