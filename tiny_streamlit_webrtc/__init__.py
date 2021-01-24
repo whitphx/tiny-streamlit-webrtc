@@ -15,7 +15,14 @@ else:
 
 
 def tiny_streamlit_webrtc(key=None):
-    component_value = _component_func(key=key, default=0)
+    component_value = _component_func(key=key, default=None)
+
+    if component_value:
+        offer_json = component_value["offerJson"]
+
+        # Debug
+        st.write(offer_json)
+
     return component_value
 
 

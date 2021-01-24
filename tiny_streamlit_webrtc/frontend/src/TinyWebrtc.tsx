@@ -80,7 +80,11 @@ class TinyWebrtc extends StreamlitComponentBase<State> {
         }
 
         // Offer is created!
-        console.log(offer)
+        const offerJson = offer.toJSON()
+        console.log("Send offer SDP to Python process: ", offerJson)
+        Streamlit.setComponentValue({
+          offerJson,
+        })
       })
   }
 
